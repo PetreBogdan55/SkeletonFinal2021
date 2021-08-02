@@ -67,21 +67,7 @@ public:
 
     bool IsSolvable() const
     {
-		// TODO: is this a good lambda?
-        auto countInversions = [](auto begin, auto end)
-        {
-            size_t acc{ 0u };
-            for (auto it = begin; it != end; ++it)
-            {
-                auto&& current = *it;
-                if (current != 0)
-                    acc += std::count_if(it, end, [current](auto next) { return next != 0 && next < current; });
-            }
-
-            return acc;
-        };
-
-        const auto inversionsCount = countInversions(m_data.begin(), m_data.end());
+		const auto inversionsCount = CountInversions(m_data.begin(), m_data.end());
         const auto isInversionCountEven = inversionsCount % 2 == 0;
         const bool isNOdd = N % 2 == 1;
         const bool isBlankRowEven = GetBlankPosition2D().first % 2 == 0;
@@ -120,36 +106,45 @@ public:
     }
 
 private: // methods
+    size_t CountInversions(typename Data::iterator begin, typename Data::iterator end)
+    {
+        size_t acc{ 0u };
+        for (auto it = begin; it != end; ++it)
+        {
+            auto&& current = *it;
+            if (current != 0)
+                acc += std::count_if(it, end, [current](auto next) { return next != 0 && next < current; });
+        }
+
+        return acc;
+    }
 
     size_t GetBlankPosition() const
     {
-        // TODO refactor using STL algo
-        for (auto idx = 0u; idx < m_data.size(); ++idx)
-        {
-            if (m_data[idx] == 0)
-                return idx;
-        }
-        throw std::runtime_error("Unexpected");
+        auto it = std::find(m_data.begin(), m_data.end(), 0);
+        if (it == m_data.end())
+            throw std::runtime_error("Unexpected");
+        return std::distance(m_data.begin(), it);
     }
 
     Position2D GetBlankPosition2D() const
     {
         auto&& absolute = GetBlankPosition(); 
-        // TODO : modern C++
-		return std::make_pair( absolute / N, absolute % N ); 
+        return { absolute / N, absolute % N };
     }
 
-    // TODO: Perform the move if possible and return the state. Returns std::nullopt otherwise.
     std::optional<State> Move(MoveDirection direction) const
     {
-        switch (direction)
+        static const std::map <MoveDirection, std::function<
+            std::optional<State>(const State&)>> movesMap
         {
-        case MoveDirection::LEFT:   return MoveLeft();
-        case MoveDirection::UP:     return MoveUp();
-        case MoveDirection::RIGHT:  return MoveRight();
-        case MoveDirection::DOWN:   return MoveDown();
-        default:                    throw std::runtime_error("Not implemented.");
-        }
+            { MoveDirection::LEFT,  std::mem_fn(&State::MoveLeft) },
+            { MoveDirection::RIGHT, std::mem_fn(&State::MoveRight) },
+            { MoveDirection::UP,    std::mem_fn(&State::MoveUp) },
+            { MoveDirection::DOWN,  std::mem_fn(&State::MoveDown) },
+        };
+        auto function = movesMap.at(direction);
+        return function(*this);
     }
 
     static State SwapTiles(const State& state, size_t firstPos, size_t secondPos)
@@ -203,7 +198,7 @@ std::ostream& operator<< (std::ostream& os, MoveDirection dir)
         { MoveDirection::DOWN, "d" },
     };
 
-    os << namesMap.at(dir); // TODO: why not [ ] operator  ?
+    os << namesMap.at(dir);
     return os;
 }
 
