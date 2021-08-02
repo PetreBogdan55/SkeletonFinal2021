@@ -36,13 +36,13 @@ public:
     }
 
     static const State GoalState()
-    {
-        // TODO: Refactor with STL        
-        Data goalData;         
-        for (auto idx = 0u; idx < goalData.size(); ++idx)
-        {
-            goalData[idx] = idx+1;
-        }
+    {     
+        Data goalData;   
+
+        //ElementType n = 1;
+        //std::generate(goalData.begin(), goalData.end(), [&n]() { return n++; });
+        std::iota(goalData.begin(), goalData.end(), 1);
+
         goalData.back() = 0;        
         return State(goalData);
     }
@@ -54,37 +54,15 @@ public:
 
     bool IsValid() const
     {
-        // TODO refactor (the 3 fors) with STL
-		// Is Valid if: no duplicates, pieces 1 - 8 and 0 is the empty space
-        
-		Data sortedData;
-        
-        for (auto idx = 0u; idx < m_data.size(); ++idx)
-        {
-            sortedData[idx] = m_data[idx];
-        }
+        //Data sortedData;
+        //std::copy(m_data.begin(), m_data.end(), sortedData.begin());
+        //std::sort(sortedData.begin(), sortedData.end());
 
-        for (auto idxI = 0u; idxI < sortedData.size() - 1 ; ++idxI)
-        {
-			for (auto idxJ = 0u; idxJ < sortedData.size() - idxI - 1 ; ++idxJ)
-			{
-				if (sortedData[idxJ] >  sortedData[idxJ + 1])
-				{
-					auto temp = sortedData[idxJ];
-					sortedData[idxJ] = sortedData[idxJ + 1];
-					sortedData[idxJ + 1] = temp;
-				}
-			}
-        } 
+        //Data validSortedData;      
+        //std::iota(validSortedData.begin(), validSortedData.end(), 0);
 
-        Data validSortedData;
-        
-        for (auto idx = 0u; idx < validSortedData.size(); ++idx)
-        {
-            validSortedData[idx] = idx;
-        }
-
-        return sortedData == validSortedData;
+        //return std::is_permutation(sortedData.begin(), sortedData.end(), GoalState().m_data.begin());
+        return std::is_permutation(m_data.begin(), m_data.end(), GoalState().m_data.begin());
     }
 
     bool IsSolvable() const
