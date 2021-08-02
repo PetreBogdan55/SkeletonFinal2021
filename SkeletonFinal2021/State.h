@@ -25,11 +25,6 @@ public:
     State() = delete;
     State(Data data) : m_data { std::move(data) } {}; // initialization_list
 
-    friend bool operator<(const State& first, const State& second)
-    {
-        return first.m_data < second.m_data;
-    }
-
     const Data& GetData() const
     {
         return m_data;
@@ -67,7 +62,7 @@ public:
 
     bool IsSolvable() const
     {
-		const auto inversionsCount = CountInversions(m_data.begin(), m_data.end());
+		const auto inversionsCount = CountInversions(m_data.cbegin(), m_data.cend());
         const auto isInversionCountEven = inversionsCount % 2 == 0;
         const bool isNOdd = N % 2 == 1;
         const bool isBlankRowEven = GetBlankPosition2D().first % 2 == 0;
@@ -106,7 +101,7 @@ public:
     }
 
 private: // methods
-    size_t CountInversions(typename Data::iterator begin, typename Data::iterator end)
+    size_t CountInversions(typename Data::const_iterator begin, typename Data::const_iterator end) const
     {
         size_t acc{ 0u };
         for (auto it = begin; it != end; ++it)

@@ -23,14 +23,14 @@ public:
 		std::queue<Node> openSet;
         openSet.push({ initialState, {} });
 
-		std::set<State_t> closedSet;
+        auto cmp = [](const State_t& first, const State_t& second) {return first.GetData() < second.GetData(); };
+
+		std::set<State_t, decltype(cmp)> closedSet(cmp);
 
         while (!openSet.empty())
         {
-			// TODO: who is first? second? structure binding
-            auto currentNode = openSet.front();      
-            auto&& currentState = currentNode.first;
-            auto&& currentMoves = currentNode.second;
+            auto currentNode = openSet.front();   
+            auto [currentState, currentMoves] = currentNode;
             openSet.pop();
 
             // some logging
@@ -52,9 +52,7 @@ public:
 
             for (auto&& childMovePair : currentState.GetChildren())
             {
-				//TODO
-                auto&& childState = childMovePair.first;
-                MoveDirection move = childMovePair.second;
+                auto [childState, move] = childMovePair;
 
 				if(closedSet.find( childState) == closedSet.end())
                 {
@@ -75,6 +73,10 @@ private:
     template <class State_t>
     static void Validate(const State_t& state)
     {
+        if (!state.IsValid())
+            throw std::runtime_error("State is invalid!");
+        if (!state.IsSolvable())
+            throw std::runtime_error("State is not solvable!");
 		return;
     }
 };
