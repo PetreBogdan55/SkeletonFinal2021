@@ -47,13 +47,15 @@ public:
 
         using Node = std::pair<State_t, Moves>;
 
-        auto cmp_greater = [](const Node& first, const Node& second)
+        auto cmp_greater = [](const Node& first, const Node& second) -> bool
         {
-            auto GetScore = [](const Node& node)
+            static auto getScore = [](const Node& node)
             {
-                return Heuristics<State_t>::GetManhattanDistance(node.first);
+                return node.second.size() +
+                    Heuristics<State_t>::GetManhattanDistance(node.first);
             };
-            return GetScore(first) > GetScore(second);
+
+            return getScore(first) > getScore(second);
         };
 		//std::queue<Node> openSet;
         std::priority_queue < Node, std::vector<Node>, decltype(cmp_greater)> openSet(cmp_greater);
