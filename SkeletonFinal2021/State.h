@@ -20,14 +20,25 @@ public: // Types
 
 private: // members
     Data m_data;
+    Position2D m_position;
 
 public:
     State() = delete;
     State(Data data) : m_data { std::move(data) } {}; // initialization_list
 
+    Position2D GetPosition(const size_t index) const
+    {
+        return { index / N, index % N };
+    }
+
     const Data& GetData() const
     {
         return m_data;
+    }
+
+    const Position2D& GetPosition() const
+    {
+        return m_position;
     }
 
     static const State GoalState()

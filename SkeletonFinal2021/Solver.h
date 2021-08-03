@@ -8,6 +8,32 @@
 #include <set>
 #include <queue>
 
+template <class State_t>
+class Heuristics
+{
+public:
+    static size_t GetManhattanDistance(const State_t& state)
+    {
+        auto currentData = state.GetData();
+        static State_t goalState = state.GoalState();
+        static auto& goalData = goalState.GetData();
+
+        size_t totalDistance = 0;
+        for (size_t index = 0; index < goalData.size(); ++index)
+        {
+            auto currentElement = currentData[index];
+            if (currentElement == 0)
+                continue;
+
+            auto&& [currentRow, currentColumn] = state.GetPosition(index);
+            auto&& [goalRow, goalColumn] = goalState.GetPosition(currentElement - 1);
+
+            totalDistance += abs(static_cast<int>(goalRow - currentRow)) + abs(static_cast<int>(goalColumn - currentColumn));
+        }
+        return totalDistance;
+    }
+};
+
 class Solver
 {
 public:
@@ -21,7 +47,16 @@ public:
 
         using Node = std::pair<State_t, Moves>;
 
-		std::queue<Node> openSet;
+        auto cmp_greater = [](const Node& first, const Node& second)
+        {
+            auto GetScore = [](const Node& node)
+            {
+                return Heuristics<State_t>::GetManhattanDistance(node.first);
+            };
+            return GetScore(first) > GetScore(second);
+        };
+		//std::queue<Node> openSet;
+        std::priority_queue < Node, std::vector<Node>, decltype(cmp_greater)> openSet(cmp_greater);
         openSet.push({ initialState, {} });
 
         //auto cmp = [](const State_t& first, const State_t& second) {return first.GetData() < second.GetData(); };
@@ -32,8 +67,11 @@ public:
 
         while (!openSet.empty())
         {
-            auto currentNode = openSet.front();   
+            auto currentNode = openSet.top();
             auto [currentState, currentMoves] = currentNode;
+            //auto&& currentState = currentNode.first;
+            //auto&& currentMoves = currentNode.second;
+
             openSet.pop();
 
             // some logging
@@ -47,7 +85,7 @@ public:
 
             if (currentState.IsGoalState())
             {
-                std::cout << "Visited: " << closedSet.size() << std::endl;                
+                std::cout << "Visited: " << closedSet.size() << std::endl;
                 return currentMoves; // leaving cycle statement
             }
 
@@ -56,8 +94,10 @@ public:
             for (auto&& childMovePair : currentState.GetChildren())
             {
                 auto [childState, move] = childMovePair;
+                /*auto&& childState = childMovePair.first;
+                MoveDirection move = childMovePair.second;*/
 
-				if(closedSet.find( childState) == closedSet.end())
+                if (closedSet.find(childState) == closedSet.end())
                 {
                     Moves childMoves = currentMoves;
                     childMoves.push_back(move);
