@@ -3,6 +3,7 @@
 #include "State.h"
 #include "io.h"
 
+#include <unordered_set>
 #include <iostream>
 #include <set>
 #include <queue>
@@ -23,9 +24,11 @@ public:
 		std::queue<Node> openSet;
         openSet.push({ initialState, {} });
 
-        auto cmp = [](const State_t& first, const State_t& second) {return first.GetData() < second.GetData(); };
+        //auto cmp = [](const State_t& first, const State_t& second) {return first.GetData() < second.GetData(); };
 
-		std::set<State_t, decltype(cmp)> closedSet(cmp);
+        auto cmp_eq = [](const State_t& first, const State_t& second) {return first.GetData() == second.GetData(); };
+
+        std::unordered_set < State_t, std::function<size_t(const State_t&)>, decltype(cmp_eq) > closedSet(8u, &ComputeHash<State_t>, cmp_eq);
 
         while (!openSet.empty())
         {
@@ -67,9 +70,6 @@ public:
     }
 
 private:
-	//TODO implement Validate
-	//throw exception if not valid
-
     template <class State_t>
     static void Validate(const State_t& state)
     {
@@ -78,5 +78,18 @@ private:
         if (!state.IsSolvable())
             throw std::runtime_error("State is not solvable!");
 		return;
+    }
+
+    template <class State_t>
+    static size_t ComputeHash(const State_t& state)
+    {
+        static std::hash<State_t::ElementType> hasher;
+        size_t hashValue = 0;
+        for (auto&& element : state.GetData())
+        {
+            //hashValue += hasher(element);
+            hashValue ^= hasher(element) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+        }
+        return hashValue;
     }
 };

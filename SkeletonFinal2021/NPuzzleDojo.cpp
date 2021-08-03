@@ -15,11 +15,12 @@ static void Test(const State<N>& initialState)
 
 
         std::cout << "Found solution in " << result.size() << " moves:" << std::endl;
-        // TODO 
-		for (auto it = result.begin(); it != result.end(); it++)
+        
+        std::for_each(result.begin(), result.end(), [](auto element) {std::cout << element << " "; });
+		/*for (auto it = result.begin(); it != result.end(); it++)
         {
             std::cout << *it << " ";
-        }        
+        }  */      
 
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
@@ -34,7 +35,7 @@ static void Test(const State<N>& initialState)
 
 int main()
 {
-    //State3X3 state_3x3_18moves{ { 3, 6, 4, 7, 2, 1, 5, 8, 0 } }; // 18 moves
+    State3X3 state_3x3_18moves{ { 3, 6, 4, 7, 2, 1, 5, 8, 0 } }; // 18 moves
     State4X4 state_4x4_50_moves{ { 12, 15, 6, 10, 4, 9, 5, 8, 14, 13, 0, 2, 1, 7, 11, 3 } }; //50 moves
     //State4X4 state_4x4_50_moves{ { 15, 14, 1, 6, 9, 11, 4, 12, 0, 10, 7, 3, 13, 8, 5, 2 } }; // 52 moves
     //State4X4 state_4x4_50_moves{ { 15, 2, 1, 12, 8, 5, 6, 11, 4, 9, 10, 7, 3, 13, 14, 0 } }; // 54 moves
